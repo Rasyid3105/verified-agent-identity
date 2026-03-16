@@ -1,0 +1,47 @@
+name: Verify Human Identity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install ClawHub Skill
+        run: npx clawhub@latest install verified-agent-identity
+
+      - name: Install Dependencies
+        run: |
+          mkdir -p scripts
+          cd scripts
+          npm init -y
+          npm install ethers
+
+      - name: Create Agent Identity
+        run: |
+          echo "Creating Ethereum identity for agent..."
+          node -e "
+          const crypto = require('crypto');
+          const id = crypto.randomBytes(16).toString('hex');
+          console.log('Agent Identity:', id);
+          "
+
+      - name: Link Human to Agent
+        run: |
+          echo 'Linking Human to Agent...'
+          echo '{
+            "profileId": "b9T7vh7kUFRY",
+            "github": "Rasyid3105",
+            "agent_name": "Rifky AI Agent",
+            "description": "AI agent linked to human identity for verification",
+            "network": "Billions"
+          }'
