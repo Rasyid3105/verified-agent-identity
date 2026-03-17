@@ -1,0 +1,58 @@
+name: Verify Human Identity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          npm init -y
+          npm install axios ethers
+
+      - name: Create Verification Script
+        run: |
+          mkdir -p scripts
+          cat << 'EOF' > scripts/linkHumanAgent.js
+          const axios = require("axios");
+          const crypto = require("crypto");
+
+          const payload = {
+            profileId: "b9T7vh7kUFRY",
+            github: "Rasyid3105",
+            agent_name: "Rifky AI Agent",
+            description: "AI agent linked to human identity",
+            network: "Billions",
+            timestamp: new Date().toISOString(),
+            nonce: crypto.randomBytes(8).toString("hex")
+          };
+
+          async function sendVerification() {
+            try {
+              const res = await axios.post(
+                "https://app.billions.network/api/agent/link",
+                payload,
+                { headers: { "Content-Type": "application/json" } }
+              );
+              console.log(res.data);
+            } catch (err) {
+              console.error(err.response?.data || err.message);
+            }
+          }
+
+          sendVerification();
+          EOF
+
+      - name: Run Verification
+        run: node scripts/linkHumanAgent.js
